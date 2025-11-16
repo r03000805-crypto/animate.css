@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Game_Space OS — Final Render</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .cosmos {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(#000 0%, #020410 45%, #0a0a20 75%, #121230 100%),
+        linear-gradient(135deg, transparent 0%, rgba(0, 0, 40, 0.4) 100%);
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+
+    /* Звёздное поле с 3D‑параллаксом */
+    .stars {
+      position: absolute;
+      top: 0; left: 0;
+      width: 400%; height: 400%;
+      background:
+        radial-gradient(#fff 6%, transparent 20%) 0 0,
+        radial-gradient(#fff 6%, transparent 20%) 250px 500px,
+        radial-gradient(#fff 6%, transparent 20%) 700px 1000px;
+      background-size: 25px 25px, 50px 50px, 100px 100px;
+      animation: stars-move 150s linear infinite, stars-blink 2s infinite alternate;
+      opacity: 0.6;
+      transform: translate(-25%, -25%) rotateX(8deg) rotateY(4deg);
+      filter: blur(0.7px);
+      will-change: transform;
+    }
+
+    /* Сверхновая с многослойной плазмой */
+    .supernova {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, #ff9900, #ff0000, #800080 40%, transparent 70%);
+      filter: blur(12px) brightness(2.5) contrast(1.2);
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      animation: explode 6s forwards;
+      z-index: 1;
+    }
+    .supernova::after, .supernova::before {
+      content: '';
+      position: absolute;
+      inset: -50px;
+      border-radius: 50%;
+      animation: plasma-ring 5s forwards 0.8s;
+      filter: blur(4px);
+      opacity: 0;
+    }
+    .supernova::after {
+      border: 5px solid #00ffff;
+      box-shadow: 0 0 30px #00ffff, 0 0 60px rgba(0, 255, 255, 0.6);
+    }
+    .supernova::before {
+      border: 3px solid #ff00ff;
+      box-shadow: 0 0 25px #ff00ff, 0 0 50px rgba(255, 0, 255, 0.5);
+      animation-delay: 1.2s;
+    }
+
+    /* Чёрная дыра с гравитационным линзированием */
+    .black-hole {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: black;
+      box-shadow:
+        0 0 70px 30px rgba(0, 0, 0, 0.99),
+        0 0 140px 60px rgba(120, 0, 255, 0.7),
+        0 0 200px 100px rgba(0, 200, 255, 0.5),
+        0 0 300px 160px rgba(0, 100, 150, 0.3);
+      transform: translate(-50%, -50%) rotate(0deg) scale(1.05);
+      animation: spin 20s linear infinite;
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+      will-change: transform, box-shadow;
+    }
+    .black-hole::before {
+      content: '';
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, transparent 0%, rgba(0, 0, 0, 0.85) 35%, rgba(60, 0, 120, 0.5) 65%, transparent 100%);
+      animation: vortex 20s linear infinite;
+      will-change: transform;
+    }
+
+    /* Аккреционный диск с волнами плазмы */
+    .accretion-disk {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, transparent 0%, #ff00ff 25%, #00ffff 75%, transparent 100%);
+      -webkit-mask: radial-gradient(circle at 50% 50%, transparent 40%, black 55%, black 65%, transparent 70%);
+      mask: radial-gradient(circle at 50% 50%, transparent 40%, black 55%, black 65%, transparent 70%);
+      transform: translate(-50%, -50%) rotate(0deg);
+      animation: rotate 10s linear infinite, energy-pulse 3s infinite alternate;
+      opacity: 0.98;
+      filter: brightness(1.8) contrast(1.4) blur(1.5px);
+      will-change: transform, filter, opacity;
+    }
+
+    /* Массив частиц с физикой */
+    .particles {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 500px; height: 500px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .particle {
+      --size: 5px;
+      --color: #00ffff;
+      position: absolute;
+      width: var(--size); height: var(--size);
+      border-radius: 50%;
+      background: var(--color);
+      opacity: 0;
+      filter: brightness(3.5) blur(2px);
+      animation: particle-fly 7s linear infinite var(--delay), particle-fade 2s forwards var(--delay);
+      will-change: transform, opacity;
+    }
+    .particle::after {
+      content: '';
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1px solid var(--color);
+      opacity: 0.5;
+      animation: particle-glow 1.5s infinite alternate var(--delay);
+      will-change: opacity, transform;
+    }
+
+    /* Голографический текст Game_Space OS */
+    .game-space {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.7) translateY(40px);
